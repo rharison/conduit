@@ -1,5 +1,5 @@
 import * as t from 'io-ts'
-import { slugCodec, urlCodec } from './scalar'
+import { slugCodec, urlCodec } from '@/core/types'
 
 export const profileCodec = t.type({
   username: slugCodec,
@@ -9,3 +9,4 @@ export const profileCodec = t.type({
 })
 
 export type Profile = t.TypeOf<typeof profileCodec>
+export type ProfileOutput = t.OutputOf<typeof profileCodec>
