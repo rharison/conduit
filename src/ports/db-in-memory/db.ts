@@ -18,10 +18,14 @@ export type DBComment = Omit<CommentOutput, 'author'> & {
 }
 
 type ArticleID = string
+type UserID = string
 
 type DB = {
   users: {
     [id: string]: DBUser
+  },
+  usersByEmail: {
+    [email: string]: UserID
   },
   articles: {
     [id: string]: DBArticle
@@ -36,6 +40,7 @@ type DB = {
 
 export const db: DB = {
   users: {},
+  usersByEmail: {},
   articles: {},
   articlesBySlug: {},
   comments: {},
