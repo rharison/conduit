@@ -1,4 +1,5 @@
 import express, { NextFunction, Request as ExpressRequest, Response } from 'express'
+import cors from 'cors'
 import { registerUser } from '@/core/user/use-cases/register-user-adapter'
 import { registerArticle } from '@/core/article/use-cases/register-article-adapter'
 import { pipe } from 'fp-ts/function'
@@ -24,6 +25,7 @@ const PORT = env('PORT')
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+app.use(cors())
 app.disable('x-powered-by').disable('etag')
 
 async function auth (req: Request, res: Response, next: NextFunction) {
