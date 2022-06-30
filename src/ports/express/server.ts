@@ -1,19 +1,16 @@
 import express, { NextFunction, Request as ExpressRequest, Response } from 'express'
 import cors from 'cors'
-import { registerUser } from '@/core/user/use-cases/register-user-adapter'
 import { registerArticle } from '@/core/article/use-cases/register-article-adapter'
 import { pipe } from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
-import * as E from 'fp-ts/Either'
 import {
-  createUserInDB,
   createArticleInDB,
   addCommentToAnArticleInDB,
-  login,
 } from '@/ports/adapters/db'
 import { env } from '@/helpers/env'
 import { addCommentToAnArticle } from '@/core/article/use-cases/add-comment-to-an-article-adapter'
 import { verifyToken, JWTPayload } from '@/ports/adapters/jwt'
+import * as user from '@/ports/adapters/http/modules/user'
 
 type Request = ExpressRequest & {
   auth?: JWTPayload
@@ -42,9 +39,9 @@ async function auth (req: Request, res: Response, next: NextFunction) {
 app.post('/api/users', async (req: Request, res: Response) => {
   return pipe(
     req.body.user,
-    registerUser(createUserInDB),
+    user.registerUser,
     TE.map(result => res.json(result)),
-    TE.mapLeft(error => res.status(422).json(getError(error.message))),
+    TE.mapLeft(error => res.status(422).json(error)),
   )()
 })
 
@@ -82,18 +79,18 @@ app.post('/api/articles/:slug/comments', auth, async (req: Request, res: Respons
 
 app.post('/api/users/login', async (req: Request, res: Response) => {
   return pipe(
-    TE.tryCatch(
-      () => login(req.body.user),
-      E.toError,
-    ),
+    req.body.user,
+    user.login,
     TE.map(result => res.json(result)),
-    TE.mapLeft(error => res.status(422).json(getError(error.message))),
+    TE.mapLeft(error => res.status(422).json(error)),
   )()
 })
 
-app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`)
-})
+export function start () {
+  app.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`)
+  })
+}
 
 function getError (errors: string) {
   return {
